@@ -81,6 +81,8 @@ def training_loop_gcn(epochs: int,
             for batch in tqdm(trn_dl):
                 opt.zero_grad()
 
+                # important: triples has dimension [batch size x (1 subj + 1 rel + max qualifier pairs)]
+                #            labels has dimension [batch size x number of entities]
                 triples, labels = batch
                 sub, rel = triples[:, 0], triples[:, 1]
                 if qualifier_aware:
@@ -107,8 +109,6 @@ def training_loop_gcn(epochs: int,
                 if grad_clipping:
                     torch.nn.utils.clip_grad_norm_(train_fn.parameters(), 1.0)
                 opt.step()
-
-
 
                 # summary_val = val_testbench()
 

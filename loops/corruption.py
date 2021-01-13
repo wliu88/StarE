@@ -186,14 +186,18 @@ if __name__ == "__main__":
     n = np.array([0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 15, 18, 19])
     corruption = Corruption(n, position=[0, 2])
     one_pos = true[10]
-    # print(one_pos)
+    print(one_pos)
 
-    # neg = corruption.corrupt_one(one_pos)
-    # print(neg[:10])
-    # print(neg.shape)
+    neg = corruption.corrupt_one_position(true, one_pos)
+    print(neg[:10])
+    print(neg.shape)
 
     batch = np.random.permutation(true)[:5]
     print('------')
     print(batch.shape)
     n = corruption.corrupt_batch(batch)
     print(n.shape)
+
+    # gold_data = np.random.randint(0, 1000, (50, 3))
+    # corrupter = Corruption(gold_data=gold_data, n=1000, position=[0, 2])
+    # corrupter.corrupt_one_position(gold_data, position=0)

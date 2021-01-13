@@ -203,6 +203,28 @@ if __name__ == "__main__":
     
         So here, train_data_gcn will be a dict containing these ndarrays.
     """
+    """
+     Both conversion functions will add inverse
+     
+     For get_alternative_graph_repr specifically
+     e.g., instances = [[1, 1, 2, 2, 3, 3, 4], [5, 4, 6, 5, 7, 6, 8]]
+           config['STATEMENT_LEN'] = 15
+           config['NUM_RELATIONS'] = 10
+              
+           g = get_alternative_graph_repr(instances, config)
+
+           print(g["edge_index"])
+           -> [[1 5 2 6]
+               [2 6 1 5]]
+           
+           print(g["edge_type"])
+           -> [ 1  4 11 14]
+           
+           print(g["quals"])
+           -> [[2 3 5 6 2 3 5 6]
+               [3 4 7 8 3 4 7 8]
+               [0 0 1 1 0 0 1 1]]
+    """
 
     if config['MODEL_NAME'].lower().startswith('stare'):
         # Replace the data with their graph repr formats
@@ -221,6 +243,7 @@ if __name__ == "__main__":
             raise NotImplementedError
 
         # add reciprocals to the train data
+        # Important: when reversing an instance, only the base triple will be reversed. Qualifier pairs stay the same.
         reci = DataManager.add_reciprocals(train_data, config)
         train_data.extend(reci)
         reci_valid = DataManager.add_reciprocals(valid_data, config)
@@ -328,6 +351,7 @@ if __name__ == "__main__":
         "opt": optimizer,
         "train_fn": model,
         "neg_generator": Corruption(n=n_entities, excluding=[0],
+                                    # Important: only corrupting values
                                     position=list(range(0, config['MAX_QPAIRS'], 2))),
         "device": config['DEVICE'],
         "data_fn": None,

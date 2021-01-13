@@ -67,7 +67,6 @@ class MultiClassSampler:
         # statement shape for correct processing of the very last batch which size might be less than self.bs
         y = np.zeros((statements.shape[0], self.n_entities), dtype=np.float32)
 
-
         for i, s in enumerate(statements):
             s, r, quals = s[0], s[1], s[2:] if self.data.shape[1] > 3 else None
             lbls = self.index[(s, r, *quals)] if self.with_q else self.index[(s,r)]
@@ -95,8 +94,22 @@ class MultiClassSampler:
             raise StopIteration
 
         _statements = self.keys[self.i: min(self.i + self.bs, len(self.keys))]
+
+        # important: _main is (subj, rel, quals), no obj
         _main = np.array([list(x) for x in _statements])
+
+        # important: this is using the 1-N training scheme
         _labels = self.get_label(_main)
         self.i = min(self.i + self.bs, len(self.keys))
+
+        # print("We are at __next__ inside MultiClassSampler where we iterate the training data")
+        # print("There are two outputs for this function: _main and _labels")
+        # print("For batch size: ", self.bs)
+        # print("For label smooth value: ", self.lbl_smooth)
+        # print("For number of entities: ", self.n_entities)
+        # print("_main[0] (length {}) is: \n{}".format(len(_main[0]), _main[0]))
+        # print("_labels[0] (length {}) is: \n{}".format(len(_labels[0]), _labels[0]))
+        # print("_labels[0] sum: ", sum(_labels[0]))
+
         return _main, _labels
 

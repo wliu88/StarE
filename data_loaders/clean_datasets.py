@@ -200,6 +200,16 @@ def load_clean_wd50k(name, subtype, maxlen=43) -> Dict:
     if subtype == "triples" or subtype == "quints":
         train, valid, test = remove_dups(train), remove_dups(valid), remove_dups(test)
 
+    print("#################################################")
+    print("Now we are at load_clean_wd50k()")
+    print("Max length of instance:", maxlen)
+    print("# Entity:", len(entoid))
+    print("# Relation:", len(prtoid))
+    print("Here are some training examples:")
+    for i in range(10):
+        print(train[i])
+    print("#################################################")
+
     return {"train": train, "valid": valid, "test": test, "n_entities": len(st_entities),
             "n_relations": len(st_predicates), 'e2id': entoid, 'r2id': prtoid}
 

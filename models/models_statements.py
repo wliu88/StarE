@@ -317,6 +317,7 @@ class Transformer_Statements(StarEBase):
 
     def forward(self, sub, rel, quals):
 
+        # sub_emb or rel_emb: [batch_size, embedding_size]
         sub_emb = torch.index_select(self.entities, 0, sub)
         rel_emb = torch.index_select(self.relations, 0, rel)
 
@@ -324,16 +325,24 @@ class Transformer_Statements(StarEBase):
         quals_rels = quals[:, 0::2].view(1, -1).squeeze(0)
         qual_obj_emb = torch.index_select(self.entities, 0, quals_ents)
         qual_rel_emb = torch.index_select(self.relations, 0, quals_rels)
+        # qual_obj_emb or qual_rel_emb: [batch_size, number of qv pairs, embedding_size]
         qual_obj_emb = qual_obj_emb.view(sub_emb.shape[0], -1, sub_emb.shape[1])
         qual_rel_emb = qual_rel_emb.view(rel_emb.shape[0], -1, rel_emb.shape[1])
-
 
         # so we first initialize with False
         mask = torch.zeros((sub.shape[0], quals.shape[1] + 2)).bool().to(self.device)
         # and put True where qual entities and relations are actually padding index 0
         mask[:, 2:] = quals == 0
 
+        # stk_inp: [sequence length (=1 subj + 1 rel + number of qv pairs), batch_size, embedding_size]
         stk_inp = self.concat(sub_emb, rel_emb, qual_rel_emb, qual_obj_emb)
+
+        # print("We are at forward() inside Transformer_Statements")
+        # print("Subject embedding dim: {}".format(sub_emb.shape))
+        # print("Relation embedding dim: {}".format(rel_emb.shape))
+        # print("Qual rel embedding dim: {}".format(qual_rel_emb.shape))
+        # print("Qual obj embedding dim: {}".format(qual_obj_emb.shape))
+        # print("stacked input (stk_inp) dim: {}".format(stk_inp.shape))
 
         if self.positional:
             positions = torch.arange(stk_inp.shape[0], dtype=torch.long, device=self.device).repeat(stk_inp.shape[1], 1)

@@ -10,7 +10,7 @@ from utils.utils_mytorch import Timer
 class EvaluationBenchGNNMultiClass:
     """
         Sampler which for each true triple,
-            |-> compares an entity ar CORRUPTION_POSITITON with **all** possible entities, and reports metrics
+            |-> compares an entity at CORRUPTION_POSITITON with **all** possible entities, and reports metrics
     """
 
     def __init__(self,
@@ -73,8 +73,6 @@ class EvaluationBenchGNNMultiClass:
 
         for k, v in self.index.items():
             self.index[k] = list(set(v))
-
-
 
     def get_label(self, statements):
         """
@@ -144,10 +142,10 @@ class EvaluationBenchGNNMultiClass:
         """
             Discard the predictions for all objects not in label (not currently evaluated)
 
-        :param pred: a 2D bs, ne tensor containing bs distributions over entities
+        :param pred: prediction scores, a 2D bs, ne tensor containing bs distributions over entities
         :param obj: the actual objects being predicted
         :param label: a 2D bs, ne multi-hot tensor
-            (where 1 -> the obj appeared in train/val/test split)
+            (where the value is 1 if the instance appeared in train/val/test split)
         :param ignored_entities: some entities we expect to not appear in s/o positions.
             can mention them here. Its a list like [2, 10, 3242344, ..., 69]
         :param results:
@@ -162,9 +160,9 @@ class EvaluationBenchGNNMultiClass:
         pred[irrelevant.bool()] = -1000000
         '''
             At this point, pred has a -1000000 at all positions where
-                label = 1 but it is not in objs.
+                label = 1 except the instances that are currently being evaluated
                 that is, if 
-                    (0, 1, 5) and (0, 1, 6) were in the KG. 
+                    triple (0, 1, 5) and (0, 1, 6) were in the KG. 
                     And the current triple being evaluated is (0, 1, 9)
                     then pred[i_batch, 5] and pred[i_batch, 6] will be -100000 but
                         pred[i_batch, 9] will retain its values.
@@ -198,6 +196,7 @@ class EvaluationBenchGNNMultiClass:
                     metr = {}
                     if position == 0:
                         # evaluate "direct"
+                        # range(100)[::5] == range(0, 100, 5)
                         for i in range(self.left_eval.shape[0])[::self.bs]:
                             eval_batch_direct = self.left_eval[i: i + self.bs]
                             subs = torch.tensor(eval_batch_direct[:, 0], device=self.config['DEVICE'])

@@ -31,17 +31,20 @@ StarE encodes hyper-relational fact by first passing Qualifier pairs through a c
 
 ## Requirements
 * Python 3.7
-* PyTorch 1.5.1
-* torch-geometric 1.6.1
-* torch-scatter 2.0.5
+* PyTorch
+* torch-geometric
+* torch-scatter
 * tqdm
 * wandb
 
-Create a new conda environment and execute `setup.sh`.
-Alternatively
+## Debug Prints
+Added three debug prints
 ```
-pip install -r requirements.txt
+1. load_clean_wd50k()
+2. __next__() inside MultiClassSampler
+3. forward() inside Transformer_Statements
 ```
+
 
 ## WD50K Dataset
 The dataset can be found in `data/clean/wd50k`.
@@ -101,6 +104,10 @@ python run.py DATASET jf17k CLEANED_DATASET False
 ```
 python run.py DATASET wikipeople CLEANED_DATASET False MAX_QPAIRS 7 EPOCHS 500
 ```
+* Transformer (H) baseline with a GPU.
+```
+CUDA_VISIBLE_DEVICES=0 python run.py DEVICE cuda DATASET wd50k MODEL_NAME stare_stats_baseline
+``` 
 
 Triple-based models can be started with this basic set of params:
 ```
